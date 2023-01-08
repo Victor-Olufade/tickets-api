@@ -1,6 +1,7 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import userRouter from './routes/userRoutes.js'
+import ticketRouter from './routes/ticketRoutes.js'
 import logger from 'morgan'
 import {errorHandler} from './middleWare/errorMiddleware.js'
 import connectDb from './config/db.js'
@@ -28,6 +29,7 @@ app.get('/', (req, res)=>{
 })
 
 app.use('/api/users', userRouter)
+app.use('/api/tickets', ticketRouter)
 app.use(errorHandler)
 app.listen(port, ()=>{
     console.log(`server listening on port ${port}`);
