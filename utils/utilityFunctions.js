@@ -5,7 +5,7 @@ dotenv.config()
 
 
 export const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' })
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1d' })
 }
 
 export const generateOtp = () => {
@@ -39,14 +39,14 @@ export const sendEmail =  (from, to, subject, html) => {
   }
 }
 
-export const eHtml = (otp) => {
+export const eHtml = (otp, name="there") => {
   let result = `
    <div style = "max-width:700px; margin: auto; border: 10px solid #ddd; padding: 50px, 20px; font-size: 110%;">
    <h2 style = "text-align: center; text-transform: uppercase; color: teal;">
-   Welcome to Victor Store
+   Welcome to Support Desk
    </h2>
    <p>
-   Hi there, your OTP is ${otp}
+   Hi ${name}, your OTP is ${otp}. It expires in 30 minutes.
    </p>
    </div>
    `

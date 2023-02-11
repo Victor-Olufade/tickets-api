@@ -43,6 +43,7 @@ export const createTicket = asyncHandler(async (req, res) => {
   })
 })
 
+
 export const getSingleTicket = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id)
   if (!user) {
@@ -67,6 +68,8 @@ export const getSingleTicket = asyncHandler(async (req, res) => {
     ticket,
   })
 })
+
+
 
 export const deleteTicket = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id)
@@ -93,6 +96,8 @@ export const deleteTicket = asyncHandler(async (req, res) => {
     message: 'Ticket deleted',
   })
 })
+
+
 
 export const updateTicket = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id)

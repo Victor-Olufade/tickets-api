@@ -25,6 +25,8 @@ export const getNotesForATicket = asyncHandler(async (req, res) => {
   })
 })
 
+
+
 export const addNotesForATicket = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id)
   if (!user) {

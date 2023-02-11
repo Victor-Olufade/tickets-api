@@ -19,6 +19,17 @@ export const registerUser = asyncHandler(async (req, res) => {
   const hasedPassword = await bcrypt.hash(password, salt)
   const { otp, expiryTime } = generateOtp()
 
+
+
+  let html = eHtml(otp, name)
+
+  if(!process.env.AdminMail || !process.env.userSubject){
+    res.status(400)
+    throw new Error("error sending otp")
+  }
+
+  const sent = await sendEmail(process.env.AdminMail, email, process.env.userSubject, html)
+
   const newUser = await User.create({
     name,
     email,
@@ -27,11 +38,6 @@ export const registerUser = asyncHandler(async (req, res) => {
     otp,
     otpExpiry: expiryTime
   })
-
-  let html = eHtml(otp)
-  const sent = await sendEmail(process.env.adminMail, email, process.env.userSubject, html)
-
-  
 
   if (newUser && sent) {
     res.status(201).json({
@@ -45,6 +51,34 @@ export const registerUser = asyncHandler(async (req, res) => {
   }
 })
 
+
+
+export const resendOtp = asyncHandler(async(req, res)=>{
+  const {email} = req.body;
+  const user = await User.findOne({email})
+  if(!user){
+    res.status(400)
+    throw new Error("You are not a registered user")
+  }
+
+  const { otp, expiryTime } = generateOtp()
+  user.expiryTime = expiryTime
+  user.save()
+  let html = eHtml(otp, user.name)
+  const sent = await sendEmail(process.env.AdminMail, email, process.env.userSubject, html)
+
+  if(sent){
+    res.status(200).json({
+      message: "OTP resent, check your email"
+    })
+  }else{
+    res.status(400)
+    throw new Error("Please try again")
+  }
+})
+
+
+
 export const verifyUser = asyncHandler(async(req, res)=>{
   const user = await User.findById(req.user.id)
   if (!user) {
@@ -54,7 +88,6 @@ export const verifyUser = asyncHandler(async(req, res)=>{
   
   const { otp } = req.body
  
-
   if (user.otp === otp && user.otpExpiry >= new Date()){
     const updatedUser = await User.findByIdAndUpdate(req.user.id, {verified: true}, { new: true })
     if(updatedUser){
@@ -73,11 +106,17 @@ export const verifyUser = asyncHandler(async(req, res)=>{
   }
 })
 
+
 export const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body
   const trueUser = await User.findOne({ email })
 
-  if (trueUser && (await bcrypt.compare(password, trueUser.password)) && trueUser.verified) {
+  if(!trueUser.verified){
+    res.status(400)
+    throw new Error("Please verify your account")
+  }
+
+  if (trueUser && (await bcrypt.compare(password, trueUser.password))) {
     res.status(200).json({
       message: 'Login is successful',
       trueUser,
@@ -85,9 +124,10 @@ export const loginUser = asyncHandler(async (req, res) => {
     })
   } else {
     res.status(401)
-    throw new Error('Invalid Credentials, ensure you verify your account')
+    throw new Error('Invalid Credentials')
   }
 })
+
 
 export const getMe = asyncHandler(async (req, res) => {
   const user = {
