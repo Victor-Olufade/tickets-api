@@ -75,7 +75,8 @@ export const resendOtp = asyncHandler(async(req, res)=>{
 
   if(sent){
     res.status(200).json({
-      message: "OTP resent, check your email"
+      message: "OTP resent, check your email",
+      token: generateToken(user._id)
     })
   }else{
     res.status(400)
@@ -86,6 +87,11 @@ export const resendOtp = asyncHandler(async(req, res)=>{
 
 
 export const verifyUser = asyncHandler(async(req, res)=>{
+  if(!req.user){
+    res.status(401)
+    throw new Error('Session expired. Request new OTP if registered')
+  }
+  
   const user = await User.findById(req.user.id)
   if (!user) {
     res.status(401)
