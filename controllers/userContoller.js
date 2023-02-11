@@ -87,11 +87,11 @@ export const resendOtp = asyncHandler(async(req, res)=>{
 
 
 export const verifyUser = asyncHandler(async(req, res)=>{
-  if(!req.user){
+  if(req.user.id === null || req.user.id === undefined){
     res.status(401)
     throw new Error('Session expired. Request new OTP if registered')
   }
-  
+
   const user = await User.findById(req.user.id)
   if (!user) {
     res.status(401)
