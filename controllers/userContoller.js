@@ -56,6 +56,7 @@ export const registerUser = asyncHandler(async (req, res) => {
 export const resendOtp = asyncHandler(async(req, res)=>{
   const {email} = req.body;
   const user = await User.findOne({email})
+
   if(!user){
     res.status(400)
     throw new Error("You are not a registered user")
@@ -68,8 +69,10 @@ export const resendOtp = asyncHandler(async(req, res)=>{
 
   const { otp, expiryTime } = generateOtp()
   user.otp = otp
-  user.expiryTime = expiryTime
-  user.save()
+  await user.save()
+  user.otpExpiry = expiryTime
+  await user.save()
+
   let html = eHtml(otp, user.name)
   const sent = await sendEmail(process.env.AdminMail, email, process.env.userSubject, html)
 
