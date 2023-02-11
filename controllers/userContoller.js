@@ -61,7 +61,13 @@ export const resendOtp = asyncHandler(async(req, res)=>{
     throw new Error("You are not a registered user")
   }
 
+  if(user.verified){
+    res.status(400)
+    throw new Error("You are already verified")
+  }
+
   const { otp, expiryTime } = generateOtp()
+  user.otp = otp
   user.expiryTime = expiryTime
   user.save()
   let html = eHtml(otp, user.name)
